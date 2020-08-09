@@ -1,10 +1,17 @@
 package Calculator.controllers;
 
+import Calculator.Main;
 import Calculator.utill.EvaluateString;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class CalculatorController {
 
@@ -13,6 +20,8 @@ public class CalculatorController {
 
     @FXML
     private Label result;
+
+    private ArrayList<String>calculation_history=new ArrayList<>();
 
     public void insertNumber(String number)
     {
@@ -56,6 +65,29 @@ public class CalculatorController {
         this.result.setText("= "+newResult);
     }
 
+    public void openHistoryWindow()
+    {
+        try {
+            FXMLLoader loader=new FXMLLoader(getClass().getResource("/Calculator/resources/history.fxml"));
+            Parent root=loader.load();
+
+            Main.getHistoryStage().setScene(new Scene(root));
+
+            HistoryController historyController=loader.getController();
+            historyController.initializeCalculations(calculation_history);
+
+            Main.getHistoryStage().show();
+        }catch (IOException ex)
+        {
+            System.out.println(ex);
+        }
+    }
+
+    public void addCalculation(String expression,String result)
+    {
+        this.calculation_history.add(expression+" = "+result);
+    }
+
     public void onMouseClick(MouseEvent mouseEvent) {
         Button button=(Button) mouseEvent.getSource();
         String buttonText=button.getText();
@@ -85,6 +117,7 @@ public class CalculatorController {
                 break;
             case "=":
                 int result= EvaluateString.evaluate(this.getExpression().getText());
+                addCalculation(this.getExpression().getText(),String.valueOf(result));
                 setResult(String.valueOf(result));
                 break;
             case "ANS":
@@ -92,6 +125,9 @@ public class CalculatorController {
                 break;
             case "DELETE":
                 deleteLast();
+                break;
+            case "HISTORY":
+                openHistoryWindow();
                 break;
         }
     }
